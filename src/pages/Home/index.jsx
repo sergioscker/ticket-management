@@ -48,7 +48,7 @@ const tickets = [
 
 export const HomePage = () => {
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-5">
+    <div className="flex flex-col items-center justify-center space-y-4 p-6">
       <div className="flex items-center justify-around space-x-4">
         <Input type="text" placeholder="Search tickets" className="w-[500px]" />
 
@@ -64,7 +64,7 @@ export const HomePage = () => {
 
       <Table>
         <TableHeader>
-          <TableRow >
+          <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead>Updated At</TableHead>
