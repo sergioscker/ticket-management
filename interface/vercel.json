@@ -1,0 +1,30 @@
+{
+  "projects": {
+    "default": {
+      "source": "interface"
+    }
+  },
+  "builds": [
+    {
+      "src": "interface/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "interface/dist"
+      }
+    },
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/serve.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "interface/dist/$1"
+    }
+  ]
+}
