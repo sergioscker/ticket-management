@@ -1,7 +1,7 @@
 'use strict';
 import { Model, DataTypes } from 'sequelize';
 
-export default class Tickets extends Model {
+export default class User extends Model {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -20,7 +20,7 @@ export default class Tickets extends Model {
       },
       {
         sequelize,
-        modelName: 'Tickets',
+        modelName: 'User',
       },
     );
   }

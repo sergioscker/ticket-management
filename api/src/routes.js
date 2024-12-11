@@ -1,7 +1,7 @@
 import { Router } from "express";
 import authMiddleware from "./app/middlewares/index.js";
 
-const routes = new Router();
+export const routes = new Router();
 
 routes.get("/", (_, res) => {
   return res.json({ message: "We are ready!" });
@@ -10,9 +10,9 @@ routes.get("/", (_, res) => {
 routes.use(authMiddleware);
 
 // Login and update user
-routes.post("/", SessionController.store);
-routes.put("/user/:id", UserController.update);
+// routes.post("/", SessionController.store);
+// routes.put("/user/:id", UserController.update);
 
 // Listing ticket and create ticket
-routes.get("/ticket", TicketController.index);
-routes.post("create-ticket", CreateTicketController.store);
+// routes.get("/ticket", TicketController.index);
+// routes.post("create-ticket", CreateTicketController.store);

@@ -1,17 +1,10 @@
 import express from 'express';
-import cors from 'cors';
 import './database/index.js';
-import routes from './routes.js';
-
-const corsOptions = {
-  origin: ['https://ticket-managment.vercel.app'],
-  Credential: true,
-};
+import { routes } from './routes.js';
 
 class App {
   constructor() {
     this.app = express();
-    this.cors.use(cors(corsOptions));
     this.middlewares();
     this.routes();
   }

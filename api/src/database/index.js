@@ -1,8 +1,8 @@
 import { Sequelize } from 'sequelize';
-import databaseConfig from './config/config.json' assert { type: 'json' };
-// Models
-// import User from '../app/models/User.js';
+import databaseConfig from '../../config/config.js';
 
+// Models
+import User from '../app/models/User.js';
 import Tickets from '../app/models/Tickets.js';
 
 // Database connection
@@ -18,10 +18,10 @@ const sequelize = new Sequelize(
 );
 
 // model initialization
-const models = [Tickets];
+const models = [User, Tickets];
 
 // models connect
-models.forEach((model) => model.init(sequelize));
+models.forEach((model) => model.initModel(sequelize));
 
 // associates configs
 models.forEach((model) => {
