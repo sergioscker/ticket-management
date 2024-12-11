@@ -5,6 +5,7 @@ export default {
     database: 'tickets',
     host: '127.0.0.1',
     dialect: 'postgres',
+    migrations: './src/database/migrations',
   },
   test: {
     username: 'postgres',

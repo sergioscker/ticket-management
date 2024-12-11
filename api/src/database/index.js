@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize';
 import databaseConfig from '../../config/config.js';
 
 // Models
-import User from '../app/models/User.js';
+import User from '../app/models/Users.js';
 import Tickets from '../app/models/Tickets.js';
 
 // Database connection

@@ -21,8 +21,6 @@ export default class UserController {
 
     const { name, email, password, departament, admin } = req.body;
 
-    
-
     const user = await User.create({
       id: uuidv4(),
       name,
@@ -33,5 +31,44 @@ export default class UserController {
     });
 
     return res.status(201).json(user);
+  }
+
+  async update(req, res) {
+    const schema = Yup.object({
+      email: Yup.string().email(),
+      password: Yup.string().min(6),
+      departament: Yup.string(),
+    });
+
+    try {
+      schema.validateSync(req.body, { abortEarly: false });
+    } catch (err) {
+      return res.status(400).json({ error: err.errors });
+    }
+
+    const { id } = req.params;
+
+    const findUser = await User.findByPk(id);
+
+    if (!findUser) {
+      return response
+        .status(400)
+        .json({ error: 'Make sure your product ID is correct.' });
+    }
+
+    const { email, password, departament } = req.body;
+
+    await User.update(
+      {
+        email,
+        password,
+        departament,
+      },
+      {
+        where: { id },
+      },
+    );
+
+    return res.status(200).json();
   }
 }

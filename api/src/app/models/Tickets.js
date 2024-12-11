@@ -3,7 +3,7 @@ import { Model, DataTypes } from 'sequelize';
 
 export default class Tickets extends Model {
   static associate(models) {
-    this.belongsTo(models.User, { foreignKey: 'createdBy', as: 'creator' });
+    this.belongsTo(models.User, { foreignKey: 'createdBy', as: 'user' });
     this.belongsTo(models.User, { foreignKey: 'assignedTo', as: 'assignee' });
   }
 
