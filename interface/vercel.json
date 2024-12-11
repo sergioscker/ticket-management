@@ -11,17 +11,9 @@
       "config": {
         "distDir": "interface/dist"
       }
-    },
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "api/serve.js"
-    },
     {
       "src": "/(.*)",
       "dest": "interface/dist/$1"
