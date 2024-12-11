@@ -1,9 +1,4 @@
 {
-  "projects": {
-    "default": {
-      "source": "interface"
-    }
-  },
   "builds": [
     {
       "src": "interface/package.json",
