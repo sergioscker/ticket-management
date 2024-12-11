@@ -1,7 +1,7 @@
 {
   "projects": {
     "default": {
-      "source": "interface"
+      "source": "ticket-managment/interface"
     }
   },
   "builds": [
