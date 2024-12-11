@@ -2,26 +2,50 @@
 import { Model, DataTypes } from 'sequelize';
 
 export default class Tickets extends Model {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
   static associate(models) {
-    // Define association here
+    this.belongsTo(models.User, { foreignKey: 'createdBy', as: 'creator' });
+    this.belongsTo(models.User, { foreignKey: 'assignedTo', as: 'assignee' });
   }
 
   static initModel(sequelize) {
     return this.init(
       {
-        username: DataTypes.STRING,
-        password: DataTypes.STRING,
-        role: DataTypes.STRING,
+        title: DataTypes.STRING,
+        description: DataTypes.STRING,
+        departament: DataTypes.STRING,
+        status: {
+          type: DataTypes.ENUM,
+          values: ['Pending', 'Rejected', 'In Progress', 'Completed'],
+          allowNull: false,
+        },
+        createdBy: {
+          type: DataTypes.INTEGER,
+          references: {
+            model: 'Users',
+            key: 'id',
+          },
+        },
+        assignedTo: {
+          type: DataTypes.INTEGER,
+          references: {
+            model: 'Users',
+            key: 'id',
+          },
+        },
+        observations: DataTypes.STRING,
       },
+
       {
         sequelize,
         modelName: 'Tickets',
       },
     );
+  }
+  static addHook() {
+    this.addHook('beforeSave', function (ticket) {
+      if (ticket.status === 'Rejected' && !ticket.observations) {
+        throw new Error('Observations are required when rejecting a ticket.');
+      }
+    });
   }
 }
