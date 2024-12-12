@@ -3,8 +3,13 @@ import { Model, DataTypes } from 'sequelize';
 
 export default class Tickets extends Model {
   static associate(models) {
-    this.belongsTo(models.User, { foreignKey: 'createdBy', as: 'user' });
-    this.belongsTo(models.User, { foreignKey: 'assignedTo', as: 'assignee' });
+    this.belongsTo(models.User, { foreignKey: 'created_by', as: 'creator' });
+    this.belongsTo(models.User, { foreignKey: 'updated_by', as: 'updator' });
+    this.belongsTo(models.State, { foreignKey: 'id_state', as: 'states' });
+    this.belongsTo(models.Department, {
+      foreignKey: 'id_department',
+      as: 'department',
+    });
   }
 
   static initModel(sequelize) {
@@ -12,27 +17,7 @@ export default class Tickets extends Model {
       {
         title: DataTypes.STRING,
         description: DataTypes.STRING,
-        departament: DataTypes.STRING,
-        status: {
-          type: DataTypes.ENUM,
-          values: ['Pending', 'Rejected', 'In Progress', 'Completed'],
-          allowNull: false,
-        },
-        createdBy: {
-          type: DataTypes.INTEGER,
-          references: {
-            model: 'Users',
-            key: 'id',
-          },
-        },
-        assignedTo: {
-          type: DataTypes.INTEGER,
-          references: {
-            model: 'Users',
-            key: 'id',
-          },
-        },
-        observations: DataTypes.STRING,
+        observations: DataTypes.TEXT,
       },
 
       {
@@ -42,8 +27,8 @@ export default class Tickets extends Model {
     );
   }
   static addHook() {
-    this.addHook('beforeSave', function (ticket) {
-      if (ticket.status === 'Rejected' && !ticket.observations) {
+    this.addHook('beforeUpdate', function (ticket) {
+      if (ticket.status === 'Rejected' && (!ticket.observations || '')) {
         throw new Error('Observations are required when rejecting a ticket.');
       }
     });

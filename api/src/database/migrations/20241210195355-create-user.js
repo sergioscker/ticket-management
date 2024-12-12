@@ -22,6 +22,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      id_department: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        references: {
+          model: 'departments',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
       admin: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
@@ -35,16 +45,6 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.fn('NOW'),
-      },
-      id_department: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        references: {
-          model: 'departments',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
       },
     });
   },

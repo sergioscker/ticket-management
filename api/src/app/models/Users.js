@@ -1,8 +1,11 @@
 'use strict';
 import { Model, DataTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
-
 export default class Users extends Model {
+  static associate(models) {
+    this.hasMany(models.Departament, { foreignKey: 'id_department' });
+  }
+
   static initModel(sequelize) {
     return this.init(
       {

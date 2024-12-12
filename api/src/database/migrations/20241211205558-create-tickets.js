@@ -28,26 +28,6 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.fn('NOW'),
       },
-      id_department: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        references: {
-          model: 'departments',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
-      id_state: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        references: {
-          model: 'states',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
       createdBy: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -64,6 +44,26 @@ module.exports = {
         references: {
           model: 'users',
           key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+      id_state: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        references: {
+          model: 'states',
+          key: 'id',
+        },
+        id_department: {
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+          references: {
+            model: 'departments',
+            key: 'id',
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL',
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
