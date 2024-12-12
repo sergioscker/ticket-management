@@ -2,53 +2,35 @@ import * as Yup from 'yup';
 import { Op } from 'sequelize';
 
 // models
-import User from '../models/Users.js';
+import Users from '../models/Users.js';
 import Ticket from '../models/Tickets.js';
 import States from '../models/States.js';
 
-export default class CreateTicketController {
-  async store(req, res) {
-    const schema = Yup.object({
-      createdBy: Yup.number().required(),
-      title: Yup.string.required(),
-      description: Yup.string.required(),
-      departament: Yup.string().required(),
-    });
-
-    try {
-      schema.validateSync(request.body, { abortEarly: false });
-    } catch (err) {
-      return response.status(400).json({ error: err.errors });
-    }
-
-    const { title, description, departament } = req.body;
-
-    const ticket = await Ticket.create({
-      id: title,
-      description,
-      departament,
-    });
-    return res.status(201).json(ticket);
-  }
-
+class TicketController {
   async update(req, res) {
     const schema = Yup.object({
       title: Yup.string,
       description: Yup.string,
       departament: Yup.string(),
+      id_state: Yup.string(),
+      observations: Yup.string(),
     });
 
+    // validate schema
     try {
       schema.validateSync(req.body, { abortEarly: false });
     } catch (err) {
       return res.status(400).json({ error: err.errors });
     }
 
-    // Admin verify
-    const { admin: isAdmin } = await User.findByPk(req.userId);
+    const user = await Users.findByPk(req.userId);
 
-    if (!isAdmin) {
-      return res.status(401).json();
+    // Admin verify
+    if (!user.admin) {
+      if (Object.keys(rest).length > 0 && !observations)
+        return res
+          .status(403)
+          .json({ error: 'You dont have permission to update these fields.' });
     }
 
     const { id } = req.params;
@@ -72,9 +54,11 @@ export default class CreateTicketController {
         .json({ error: 'Cannot update a rejected or finalized ticket.' });
     }
 
+    // validate rejected states
     const newState = await States.findByPk(id_state);
+
     if (
-      newState.title === 'Recusado' &&
+      newState.title === 'Rejected' &&
       (!observations || observations.trim() === '')
     ) {
       return res.status(400).json({
@@ -84,7 +68,7 @@ export default class CreateTicketController {
 
     const { id_state, observations, ...rest } = req.body;
 
-    // ticket update
+    // updated ticket
     await findTicket.update(
       {
         id_state,
@@ -103,7 +87,7 @@ export default class CreateTicketController {
     const { page = 1, limit = 10 } = req.query;
 
     try {
-      const user = await User.findByPk(req.userId);
+      const user = await Users.findByPk(req.userId);
 
       if (!user) {
         return res.status(404).json({ error: 'User does not exists' });
@@ -173,3 +157,5 @@ export default class CreateTicketController {
     }
   }
 }
+
+export default new TicketController();

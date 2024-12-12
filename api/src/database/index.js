@@ -1,24 +1,33 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { Sequelize } from 'sequelize';
-import databaseConfig from '../../config/config.js';
+import dbConfig from '../../config/config.js';
 
 // Models
-import User from '../app/models/Users.js';
+import Users from '../app/models/Users.js';
 import Tickets from '../app/models/Tickets.js';
+import Departments from '../app/models/Departments.js';
+import States from '../app/models/States.js';
+
+// Set the current environment (defaults to 'development')
+const env = process.env.NODE_ENV || 'development';
+const config = dbConfig[env];
+
+// models list
+const models = [Users, Tickets, Departments, States];
 
 // Database connection
 const sequelize = new Sequelize(
-  databaseConfig.development.database,
-  databaseConfig.development.username,
-  databaseConfig.development.password,
-
+  config.database,
+  config.username,
+  config.password,
   {
-    host: databaseConfig.development.host,
-    dialect: databaseConfig.development.dialect,
+    host: config.host,
+    dialect: config.dialect,
+    logging: false,
   },
 );
-
-// model initialization
-const models = [User, Tickets];
 
 // models connect
 models.forEach((model) => model.initModel(sequelize));
@@ -30,4 +39,5 @@ models.forEach((model) => {
   }
 });
 
-export default sequelize;
+export { sequelize };
+export default sequelize.models;

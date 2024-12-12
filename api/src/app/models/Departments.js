@@ -1,9 +1,12 @@
 'use strict';
 import { Model, DataTypes } from 'sequelize';
 
-export default class Department extends Model {
+export default class Departments extends Model {
   static associate(models) {
-    this.hasMany(models.Ticket, { foreignKey: 'id_state' });
+    this.hasMany(models.Tickets, {
+      foreignKey: 'id_department',
+      as: 'tickets',
+    });
   }
 
   static initModel(sequelize) {
@@ -14,7 +17,7 @@ export default class Department extends Model {
 
       {
         sequelize,
-        modelName: 'Departaments',
+        modelName: 'Departments',
       },
     );
   }

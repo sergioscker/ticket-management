@@ -1,9 +1,11 @@
 import * as Yup from 'yup';
 import jwt from 'jsonwebtoken';
 import authConfig from '../../config/auth.js';
-import User from '../models/Users.js';
 
-export default class SessionController {
+// model
+import Users from '../models/Users.js';
+
+class SessionController {
   async store(req, res) {
     const schema = Yup.object({
       email: Yup.string().email().required(),
@@ -24,7 +26,7 @@ export default class SessionController {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({
+    const user = await Users.findOne({
       where: {
         email,
       },
@@ -51,3 +53,5 @@ export default class SessionController {
     });
   }
 }
+
+export default new SessionController();

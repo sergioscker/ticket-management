@@ -3,7 +3,7 @@ import { Model, DataTypes } from 'sequelize';
 
 export default class States extends Model {
   static associate(models) {
-    this.hasMany(models.Ticket, { foreignKey: 'id_states' });
+    this.hasMany(models.Tickets, { foreignKey: 'id_state' });
   }
 
   static initModel(sequelize) {

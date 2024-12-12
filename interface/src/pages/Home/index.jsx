@@ -106,7 +106,7 @@ export const HomePage = () => {
                       {new Date(ticket.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Updated:</span>
                     <span>
