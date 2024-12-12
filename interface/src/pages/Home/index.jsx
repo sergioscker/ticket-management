@@ -1,15 +1,15 @@
 // components
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const tickets = [
   {
@@ -30,7 +30,7 @@ const tickets = [
   },
   {
     id: 3,
-    title: 'Fixed projetc Figma designer',
+    title: 'Fixed project Figma designer',
     createdAt: '2024-12-05',
     updatedAt: '2024-12-12',
     department: 'Designer',
@@ -46,46 +46,83 @@ const tickets = [
   },
 ];
 
+const statusColors = {
+  Pending: 'bg-yellow-200 text-yellow-800',
+  'In Progress': 'bg-blue-200 text-blue-800',
+  Reject: 'bg-red-200 text-red-800',
+  Completed: 'bg-green-200 text-green-800',
+};
+
 export const HomePage = () => {
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 p-6">
-      <div className="flex items-center justify-around space-x-4 pb-5">
-        <Input type="text" placeholder="Search tickets" className="w-[500px]" />
+    <div className="flex flex-col min-h-screen p-6">
+      <div className="flex flex-col space-y-4 mb-6">
+        <div className="flex items-center justify-between">
+          <Input
+            type="text"
+            placeholder="Search tickets"
+            className="w-full max-w-md"
+          />
+          <div className="flex items-center space-x-4">
+            {Object.keys(statusColors).map((status) => (
+              <label key={status} className="flex items-center space-x-2">
+                <Checkbox id={status} />
+                <span>{status}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        <div className="flex items-center space-x-2">
+      <div className="flex-1 overflow-y-auto">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {tickets.map((ticket) => (
-            <label key={ticket} className="flex items-center space-x-2">
-              <Checkbox />
-              <span>{ticket.status}</span>
-            </label>
+            <Card key={ticket.id} className="flex flex-col">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg">{ticket.title}</CardTitle>
+                    <CardDescription>Ticket ID: {ticket.id}</CardDescription>
+                  </div>
+                  <Badge
+                    className={`${
+                      statusColors[ticket.status]
+                    } px-2 py-1 text-xs font-semibold rounded-full`}
+                  >
+                    {ticket.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Department:</span>
+                    <span>{ticket.department}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Created:</span>
+                    <span>
+                      {new Date(ticket.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Updated:</span>
+                    <span>
+                      {new Date(ticket.updatedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
 
-      <Table className="table-auto sm:table-fixed">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead>Updated At</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tickets.map((ticket) => (
-            <TableRow key={ticket.id}>
-              <TableCell>{ticket.title}</TableCell>
-              <TableCell>{ticket.createdAt}</TableCell>
-              <TableCell>{ticket.updatedAt}</TableCell>
-              <TableCell>{ticket.department}</TableCell>
-              <TableCell>{ticket.status}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <Button>Load More</Button>
+      <div className="flex justify-center mt-6">
+        <Button>Load More</Button>
+      </div>
     </div>
   );
 };
