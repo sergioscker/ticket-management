@@ -1,6 +1,6 @@
-import express from 'express';
-import './database/index.js';
-import { routes } from './routes.js';
+const express = require('express');
+require('./database/index.js');
+const { routes } = require('./routes.js');
 
 class App {
   constructor() {
@@ -18,4 +18,4 @@ class App {
   }
 }
 
-export default new App().app;
+module.exports = new App().app;

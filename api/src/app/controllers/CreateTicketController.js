@@ -1,32 +1,42 @@
-import * as Yup from 'yup';
+const Yup = require('yup');
 
-// models
-import Ticket from '../models/Tickets.js';
+// model
+const Tickets = require('../models/Tickets.js');
 
 class CreateTicketController {
   async store(req, res) {
+    // Validation schema for creating a ticket
     const schema = Yup.object({
-      createdBy: Yup.number().required(),
-      title: Yup.string.required(),
-      description: Yup.string.required(),
-      departament: Yup.string().required(),
+      title: Yup.string().required(),
+      description: Yup.string().required(),
+      department: Yup.string().required(),
     });
 
+    // Validate the request body
+    let validationErrors;
     try {
-      schema.validateSync(request.body, { abortEarly: false });
+      schema.validateSync(req.body, { abortEarly: false });
     } catch (err) {
-      return response.status(400).json({ error: err.errors });
+      validationErrors = err.errors;
     }
 
-    const { title, description, departament } = req.body;
+    // If validation fails, return error response
+    if (validationErrors) {
+      return res.status(400).json({ error: validationErrors });
+    }
 
-    const ticket = await Ticket.create({
-      id: title,
+    const { title, description, department } = req.body;
+
+    // Create a new ticket
+    const ticket = await Tickets.create({
+      title,
       description,
-      departament,
+      department,
     });
+
+    // Return the created ticket
     return res.status(201).json(ticket);
   }
 }
 
-export default new CreateTicketController();
+module.exports = new CreateTicketController();

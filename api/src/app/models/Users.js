@@ -1,7 +1,8 @@
 'use strict';
-import { Model, DataTypes } from 'sequelize';
-import bcrypt from 'bcrypt';
-export default class Users extends Model {
+const { Model, Sequelize } = require('sequelize');
+const bcrypt = require('bcrypt');
+
+class Users extends Model {
   static associate(models) {
     // Um usuário pertence a um departamento
     this.belongsTo(models.Departments, {
@@ -21,29 +22,30 @@ export default class Users extends Model {
   }
 
   static initModel(sequelize) {
-    return this.init(
+    super.init(
       {
-        name: DataTypes.STRING,
-        email: DataTypes.STRING,
-        password: { type: DataTypes.VIRTUAL, allowNull: false },
-        password_hash: { type: DataTypes.STRING, allowNull: false },
-        admin: DataTypes.BOOLEAN,
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        password: Sequelize.VIRTUAL,
+        password_hash: Sequelize.STRING || Sequelize.NUMBER,
+        admin: Sequelize.BOOLEAN,
       },
       {
         sequelize,
         modelName: 'Users',
       },
     );
-  }
-  static addHook() {
-    this.addHook('beforeSave', async function (user) {
+
+    this.addHook('beforeSave', async (user) => {
       if (user.password) {
-        user.password_hash = await bcrypt.hash(user.password, 10);
+        user.password_hash = await bcrypt.hashSync(user.password, 10);
       }
     });
+    return this;
   }
-
   async comparePassword(password) {
     return bcrypt.compare(password, this.password_hash);
   }
 }
+
+module.exports = Users;

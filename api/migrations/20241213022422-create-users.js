@@ -25,8 +25,9 @@ module.exports = {
       id_department: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
+        title: Sequelize.STRING,
         references: {
-          model: 'departments',
+          model: 'Departments',
           key: 'id',
         },
         onUpdate: 'CASCADE',

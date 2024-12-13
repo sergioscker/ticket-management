@@ -1,50 +1,59 @@
-import * as Yup from 'yup';
-import { Op } from 'sequelize';
+const Yup = require('yup');
+const { Op } = require('sequelize');
 
-// models
-import Users from '../models/Users.js';
-import Ticket from '../models/Tickets.js';
-import States from '../models/States.js';
+// model
+const Users = require('../models/Users.js');
+const Tickets = require('../models/Tickets.js');
+const States = require('../models/States.js');
 
 class TicketController {
   async update(req, res) {
+    // Schema validation for ticket updates
     const schema = Yup.object({
-      title: Yup.string,
-      description: Yup.string,
-      departament: Yup.string(),
-      id_state: Yup.string(),
+      title: Yup.string(),
+      description: Yup.string(),
       observations: Yup.string(),
     });
 
-    // validate schema
+    // Validate the request body against the schema
+    let validationErrors;
     try {
       schema.validateSync(req.body, { abortEarly: false });
     } catch (err) {
-      return res.status(400).json({ error: err.errors });
+      validationErrors = err.errors;
     }
 
+    // If validation fails, return error response
+    if (validationErrors) {
+      return res.status(400).json({ error: validationErrors });
+    }
+
+    // Get user details
     const user = await Users.findByPk(req.userId);
 
-    // Admin verify
+    // Admin check
     if (!user.admin) {
-      if (Object.keys(rest).length > 0 && !observations)
+      const { observations, ...rest } = req.body;
+      // If user is not admin and tries to modify fields without observations, return error
+      if (Object.keys(rest).length > 0 && !observations) {
         return res
           .status(403)
-          .json({ error: 'You dont have permission to update these fields.' });
+          .json({ error: 'You don’t have permission to update these fields.' });
+      }
     }
 
     const { id } = req.params;
 
-    // Finding Ticket
-    const findTicket = await Ticket.findByPk(id);
+    // Find the ticket by its ID
+    const findTicket = await Tickets.findByPk(id);
 
     if (!findTicket) {
-      return response
+      return res
         .status(404)
         .json({ error: 'Make sure your ticket ID is correct.' });
     }
 
-    // Prevent changing "Refused" and "Finalized" states
+    // Prevent updating for "Rejected" and "Finalized" states
     const immutableStates = ['Rejected', 'Completed'];
     const currentState = await States.findByPk(findTicket.id_state);
 
@@ -54,8 +63,8 @@ class TicketController {
         .json({ error: 'Cannot update a rejected or finalized ticket.' });
     }
 
-    // validate rejected states
-    const newState = await States.findByPk(id_state);
+    // Validate rejected states
+    const { id_state, observations, ...rest } = req.body;
 
     if (
       newState.title === 'Rejected' &&
@@ -66,9 +75,7 @@ class TicketController {
       });
     }
 
-    const { id_state, observations, ...rest } = req.body;
-
-    // updated ticket
+    // Update ticket details
     await findTicket.update(
       {
         id_state,
@@ -90,18 +97,18 @@ class TicketController {
       const user = await Users.findByPk(req.userId);
 
       if (!user) {
-        return res.status(404).json({ error: 'User does not exists' });
+        return res.status(404).json({ error: 'User does not exist' });
       }
 
       const { state, search } = req.query;
       const filters = {};
 
-      /* filters for states */
+      // Filters for states
       if (state) {
         filters.state = { [Op.in]: state.split(',') }; // Support for multiple states
       }
 
-      /* filters for texts */
+      // Filters for text search
       if (search) {
         filters[Op.or] = [
           { title: { [Op.like]: `%${search}%` } },
@@ -111,14 +118,13 @@ class TicketController {
 
       let tickets;
 
-      /* Checks if user is admin */
+      // Check if the user is an admin
       if (user.admin) {
-        tickets = await Ticket.findAll({
+        tickets = await Tickets.findAll({
           where: filters,
-
           include: [
             {
-              model: User,
+              model: Users,
               as: 'user',
               attributes: ['id', 'name'],
             },
@@ -127,7 +133,7 @@ class TicketController {
           offset: (page - 1) * limit,
         });
       } else {
-        tickets = await Ticket.findAll({
+        tickets = await Tickets.findAll({
           where: {
             [Op.and]: [
               filters,
@@ -141,7 +147,7 @@ class TicketController {
           },
           include: [
             {
-              model: User,
+              model: Users,
               as: 'user',
               attributes: ['id', 'name'],
             },
@@ -150,6 +156,7 @@ class TicketController {
           offset: (page - 1) * limit,
         });
       }
+
       return res.status(200).json(tickets);
     } catch (err) {
       console.error(err);
@@ -158,4 +165,4 @@ class TicketController {
   }
 }
 
-export default new TicketController();
+module.exports = new TicketController();

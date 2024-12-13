@@ -1,7 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
-import * as Yup from 'yup';
+const { v4: uuidv4 } = require('uuid');
+const Yup = require('yup');
 
-import Users from '../models/Users.js';
+// model
+const Users = require('../models/Users.js');
 
 class UserController {
   async store(req, res) {
@@ -9,7 +10,6 @@ class UserController {
       name: Yup.string().required(),
       email: Yup.string().email().required(),
       password: Yup.string().required().min(6),
-      departament: Yup.string().required(),
       admin: Yup.boolean(),
     });
 
@@ -19,25 +19,49 @@ class UserController {
       return res.status(400).json({ error: err.errors });
     }
 
-    const { name, email, password, departament, admin } = req.body;
+    const { name, email, password, department, admin } = req.body;
+
+    const userExists = await Users.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (userExists) {
+      return response.status(400).json({ error: 'User already exists' });
+    }
+
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+
+    if (!department) {
+      return res.status(400).json({ error: 'Make sure department selected' });
+    }
 
     const user = await Users.create({
       id: uuidv4(),
       name,
       email,
       password,
-      departament,
+      department,
       admin,
     });
 
-    return res.status(201).json(user);
+    return res.status(201).json({
+      id: user.id,
+      name,
+      email,
+      department,
+      admin,
+    });
   }
 
   async update(req, res) {
     const schema = Yup.object({
       email: Yup.string().email(),
       password: Yup.string().min(6),
-      departament: Yup.string(),
+      department: Yup.string(),
     });
 
     try {
@@ -56,13 +80,13 @@ class UserController {
         .json({ error: 'Make sure your product ID is correct.' });
     }
 
-    const { email, password, departament } = req.body;
+    const { email, password, department } = req.body;
 
     await Users.update(
       {
         email,
         password,
-        departament,
+        department,
       },
       {
         where: { id },
@@ -92,7 +116,7 @@ class UserController {
 
       return response.status(200).json({
         total: users.count,
-        pages: Math.ceil(users, count / limit),
+        pages: Math.ceil(users.count / limit),
         users: users.rows,
       });
     } catch (err) {
@@ -103,4 +127,5 @@ class UserController {
     }
   }
 }
-export default new UserController();
+
+module.exports = new UserController();

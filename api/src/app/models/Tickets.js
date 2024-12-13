@@ -1,7 +1,7 @@
 'use strict';
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default class Tickets extends Model {
+class Tickets extends Model {
   static associate(models) {
     this.belongsTo(models.Users, { foreignKey: 'created_by', as: 'creator' });
     this.belongsTo(models.Users, { foreignKey: 'updated_by', as: 'updator' });
@@ -19,13 +19,13 @@ export default class Tickets extends Model {
         description: DataTypes.STRING,
         observations: DataTypes.TEXT,
       },
-
       {
         sequelize,
         modelName: 'Tickets',
       },
     );
   }
+
   static addHook() {
     this.addHook('beforeUpdate', function (ticket) {
       if (ticket.status === 'Rejected' && (!ticket.observations || '')) {
@@ -34,3 +34,5 @@ export default class Tickets extends Model {
     });
   }
 }
+
+module.exports = Tickets;

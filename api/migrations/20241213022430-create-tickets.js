@@ -6,7 +6,6 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
@@ -32,7 +31,7 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         references: {
-          model: 'users',
+          model: 'Users',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -42,7 +41,7 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         references: {
-          model: 'users',
+          model: 'Users',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -52,14 +51,14 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         references: {
-          model: 'states',
+          model: 'States',
           key: 'id',
         },
         id_department: {
           type: Sequelize.UUID,
           defaultValue: Sequelize.UUIDV4,
           references: {
-            model: 'departments',
+            model: 'Departments',
             key: 'id',
           },
           onUpdate: 'CASCADE',

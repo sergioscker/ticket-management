@@ -1,7 +1,7 @@
 'use strict';
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default class Departments extends Model {
+class Departments extends Model {
   static associate(models) {
     this.hasMany(models.Tickets, {
       foreignKey: 'id_department',
@@ -14,7 +14,6 @@ export default class Departments extends Model {
       {
         title: DataTypes.STRING,
       },
-
       {
         sequelize,
         modelName: 'Departments',
@@ -22,3 +21,5 @@ export default class Departments extends Model {
     );
   }
 }
+
+module.exports = Departments;
