@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 import { getTickets } from '../../service/api';
-import { useTicket } from '../../hooks/useTicket';
+import { useTicketFilters } from '@/hooks/useTicketFilters';
 
 // components
 import { Input } from '@/components/ui/input';
@@ -19,8 +19,8 @@ import {
 
 const statusColors = {
   Pending: 'bg-yellow-200 text-yellow-800',
-  'In Progress': 'bg-blue-200 text-blue-800',
   Rejected: 'bg-red-200 text-red-800',
+  'In Progress': 'bg-blue-200 text-blue-800',
   Completed: 'bg-green-200 text-green-800',
 };
 
@@ -29,13 +29,14 @@ export const HomePage = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [page, setPage] = useState(1); // Pagination
 
-  const { states, updateStates, searchText, updateSearchText } = useTicket();
+  const { searchText, filteredTickets, handleSearchChange, handleStateToggle } =
+    useTicketFilters(tickets);
 
   // Fetch tickets when the component mounts or page changes
   useEffect(() => {
     fetchTickets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, states, searchText]);
+  }, [page]);
 
   // Fetch tickets from the API
   const fetchTickets = async () => {
@@ -44,7 +45,7 @@ export const HomePage = () => {
 
       const data = await getTickets(page);
 
-      setTickets(data);
+      setTickets((prevTickets) => [...prevTickets, ...data]);
     } catch {
       toast.error('Failed to load tickets.');
     } finally {
@@ -56,27 +57,32 @@ export const HomePage = () => {
     <div className="flex flex-col min-h-screen p-6">
       {/* Search Section */}
       <div className="space-y-4 mb-6">
-        <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-around">
+        <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-evenly">
           <Input
             type="text"
             value={searchText}
-            onChange={(data) => updateSearchText(data.target.value)}
+            onChange={handleSearchChange}
             placeholder="Search tickets"
             className="w-full max-w-md"
           />
 
           <div className="flex md:flex-row items-center space-y-2 md:space-x-4 md:space-y-0">
             {Object.keys(statusColors).map((status) => (
-              <ul key={status} className="flex items-center space-x-2">
-                <li className="flex flex-wrap items-center justify-center p-2 gap-3">
-                  <Checkbox
-                    id={status}
-                    checked={states.includes(status)}
-                    onChange={() => updateStates(status)}
-                  />
-                  <span>{status}</span>
-                </li>
-              </ul>
+              <div
+                key={status}
+                className="flex flex-wrap justify-center gap-2 items-center space-x-2 p-3 xl:p-5"
+              >
+                <Checkbox
+                  id={status}
+                  onChange={() => handleStateToggle(status)}
+                />
+                <label
+                  htmlFor={status}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {status}
+                </label>
+              </div>
             ))}
           </div>
         </div>
@@ -85,8 +91,11 @@ export const HomePage = () => {
       {/* Tickets List */}
       <div className="flex overflow-y-auto mx-auto p-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-          {tickets.map((ticket) => (
-            <Card key={ticket.id} className="flex flex-col h-full">
+          {filteredTickets.map((ticket) => (
+            <Card
+              key={`${ticket.id}-${ticket.createdAt}`}
+              className="flex flex-col h-full"
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>

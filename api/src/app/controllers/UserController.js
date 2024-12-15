@@ -87,58 +87,73 @@ class UserController {
     const user = await Users.findByPk(req.userId);
 
     if (!user) {
-      return res.status(400).json({ error: 'Make sure your user exists' });
+      return res.status(400).json({ error: 'User not found.' });
     }
 
     const schema = Yup.object({
       name: Yup.string(),
-      password: Yup.string().min(6),
-      department: Yup.string(),
+      currentPassword: Yup.string().min(
+        6,
+        'Current password must be at least 6 characters',
+      ),
+      newPassword: Yup.string()
+        .min(6, 'New password must be at least 6 characters')
+        .test(
+          'not-same-as-current',
+          'New password cannot be the same as current password',
+          function (value) {
+            return !value || value !== this.parent.currentPassword;
+          },
+        ),
+      department: Yup.string().uuid().nullable(),
     });
 
     try {
-      schema.validateSync(req.body, { abortEarly: false });
+      await schema.validate(req.body, { abortEarly: false });
     } catch (err) {
       return res.status(400).json({ error: err.errors });
     }
 
-    const { name, password, department } = req.body;
+    const { name, currentPassword, newPassword, department } = req.body;
 
-    // Verificar se o departamento enviado é o mesmo já cadastrado no usuário
-    if (department && department === user.department) {
-      return res.status(400).json({
-        error: 'The selected department is already registered for this user.',
-      });
+    // Verificar se o departamento existe, se fornecido
+    if (department) {
+      const departmentExist = await Departments.findByPk(department);
+      if (!departmentExist) {
+        return res.status(400).json({ error: 'Department not found.' });
+      }
     }
 
-    const departmentExist = await Departments.findByPk(department);
+    // Atualizar apenas os campos modificados
+    const updatedData = {};
+    if (name) updatedData.name = name;
+    if (department) updatedData.id_department = department;
 
-    if (!departmentExist) {
-      return res.status(400).json({
-        error: 'The selected department does not exist.',
-      });
+    // Verificar se a senha atual coincide com a senha armazenada e atualizar a senha, se necessário
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          error: 'Current password is required to set a new password.',
+        });
+      }
+      if (!(await bcrypt.compare(currentPassword, user.password_hash))) {
+        return res
+          .status(400)
+          .json({ error: 'Current password is incorrect.' });
+      }
+      updatedData.password_hash = await bcrypt.hash(newPassword, 10);
     }
 
-    // Verifique se a senha foi enviada
-    let hashedPassword = user.password; // senha atual do user
+    await Users.update(updatedData, {
+      where: { id: req.userId },
+    });
 
-    if (password) {
-      // Criptografar a nova senha
-      hashedPassword = await bcrypt.hash(password, 10);
-    }
+    // Retornar os dados atualizados
+    const updatedUser = await Users.findByPk(req.userId, {
+      attributes: ['id', 'name', 'id_department'],
+    });
 
-    await Users.update(
-      {
-        name,
-        password: hashedPassword,
-        department,
-      },
-      {
-        where: { id: req.userId },
-      },
-    );
-
-    return res.status(200).json();
+    return res.status(200).json(updatedUser);
   }
 
   async index(req, res) {

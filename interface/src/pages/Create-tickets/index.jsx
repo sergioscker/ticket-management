@@ -12,36 +12,47 @@ import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const CreateTicket = () => {
   const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchDepartments = async () => {
       try {
-        const { data } = await api.get('/users');
-
-        const uniqueDepartments = Array.from(
-          new Map(
-            data.map((user) => [user.department.id, user.department]),
-          ).values(),
-        );
+        const { data } = await api.get('/departments');
+        setDepartments(data);
       } catch {
-        toast.error('Failed to load user data');
+        toast.error('Failed to load departments. Please try again later.');
       }
     };
 
-    fetchUserData();
+    fetchDepartments();
   }, []);
 
   const schema = yup.object({
     title: yup.string().required('Title is required.'),
     description: yup.string().required('Description is required.'),
-    department: yup.string().required('Department is required.'),
+    departmentId: yup.string().required('You must select a department.'),
   });
-  const { register, handleSubmit } = useForm({
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
   });
 
@@ -49,31 +60,23 @@ export const CreateTicket = () => {
     setLoading(true);
 
     try {
-      const { status } = await api.post(
-        '/create-ticket',
-        {
-          title: data.title,
-          description: data.description,
-        },
-        {
-          validadeStatus: () => true,
-        },
-      );
+      const response = await api.post('/create-ticket', data, {
+        validateStatus: () => true,
+      });
 
-      if (status === 200 || status === 201) {
-        setTimeout(() => {
-          navigate('/home');
-        }, 2000);
+      if (response.status === 201) {
         toast.success('Ticket created successfully!');
-      } else if (status === 409) {
-        toast.error('Ticket already registered. Log in again to continue.');
+        setTimeout(() => navigate('/home'), 2000);
+      } else if (response.status === 400) {
+        toast.error(response.data.error || 'Validation failed.');
       } else {
         throw new Error();
       }
     } catch {
-      toast.error('😢System failure! Please try again');
+      toast.error('😢 System failure! Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -92,8 +95,11 @@ export const CreateTicket = () => {
             type="text"
             placeholder="Title"
             {...register('title')}
-            className="w-full"
+            className={`w-full ${errors.title ? 'border-red-500' : ''}`}
           />
+          {errors.title && (
+            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+          )}
         </div>
 
         {/* Textarea - Description */}
@@ -101,15 +107,25 @@ export const CreateTicket = () => {
           <Textarea
             placeholder="Description"
             {...register('description')}
-            className="w-full rounded-md border border-gray-400 p-2"
+            className={`w-full rounded-md border ${
+              errors.description ? 'border-red-500' : 'border-gray-400'
+            } p-2`}
           />
+          {errors.description && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.description.message}
+            </p>
+          )}
         </div>
 
         {/* Select Department */}
-        {/* <div>
-          {departments ? (
-            <Select {...register('department')} className="w-full">
-              <SelectTrigger className="rounded-md border border-gray-400">
+        <div>
+          {departments.length > 0 ? (
+            <Select
+              onValueChange={(value) => setValue('departmentId', value)}
+              className="w-full"
+            >
+              <SelectTrigger>
                 <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>
@@ -126,11 +142,16 @@ export const CreateTicket = () => {
           ) : (
             <p>Loading departments...</p>
           )}
-        </div> */}
+          {errors.departmentId && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.departmentId.message}
+            </p>
+          )}
+        </div>
 
         {/* Submit Button */}
         <Button type="submit" className="w-full sm:w-auto px-6 py-2">
-          {loading ? 'Sending...' : 'Sent information'}
+          {loading ? 'Sending...' : 'Send Information'}
         </Button>
       </form>
     </div>

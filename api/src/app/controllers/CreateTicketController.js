@@ -8,64 +8,50 @@ const States = require('../models/States.js');
 class CreateTicketController {
   async store(req, res) {
     try {
-      // Verifica o usuário autenticado
+      // Busca o usuário autenticado
       const user = await Users.findByPk(req.userId, {
-        include: [
-          {
-            model: Departments,
-            as: 'department',
-            attributes: ['id', 'title'],
-          },
-        ],
+        attributes: ['id', 'name', 'admin'],
       });
 
       if (!user) {
         return res
           .status(400)
-          .json({ error: 'Make sure the user has been created.' });
+          .json({ error: 'Make sure the user is authenticated.' });
       }
 
       // Validação do payload
       const schema = Yup.object().shape({
-        title: Yup.string().required(),
-        description: Yup.string().required(),
-        departmentId: Yup.string().when('admin', {
-          is: true, // Só valida `departmentId` se o usuário for admin
-          then: Yup.string().required('Department is required for admins.'),
-          otherwise: Yup.string().notRequired(),
-        }),
+        title: Yup.string().required('Title is required.'),
+        description: Yup.string().required('Description is required.'),
+        departmentId: Yup.string().required('Department is required.'),
       });
 
       let validationErrors;
-
       try {
-        schema.validateSync(
-          { ...req.body, admin: user.admin },
-          { abortEarly: false },
-        );
+        schema.validateSync(req.body, { abortEarly: false });
       } catch (err) {
         validationErrors = err.errors;
       }
 
       if (validationErrors) {
-        return res.status(400).json({ error: validationErrors });
+        return res.status(400).json({
+          error: 'Validation failed',
+          messages: validationErrors,
+        });
       }
 
       const { title, description, departmentId } = req.body;
 
-      // Determina o departamento: admin pode especificar, outros usam o vinculado
-      const department =
-        user.admin && departmentId
-          ? await Departments.findByPk(departmentId)
-          : user.department;
+      // Verifica se o departamento selecionado é válido
+      const department = await Departments.findByPk(departmentId);
 
       if (!department) {
-        return res
-          .status(400)
-          .json({ error: 'Invalid department. Please check the provided ID.' });
+        return res.status(400).json({
+          error: 'Invalid department. Please select a valid department.',
+        });
       }
 
-      // Busca o estado padrão "Pending" no banco de dados
+      // Busca o estado padrão "Pending"
       const defaultState = await States.findOne({
         where: { title: 'Pending' },
       });
@@ -76,7 +62,7 @@ class CreateTicketController {
         });
       }
 
-      // Cria o ticket com os dados fornecidos e state padrão
+      // Cria o ticket
       const ticket = await Tickets.create({
         id: uuidv4(),
         title,

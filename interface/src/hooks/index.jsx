@@ -1,14 +1,9 @@
 import PropTypes from 'prop-types';
 
 import { UserProvider } from './UserProvider';
-import { TicketProvider } from './TicketProvider';
 
 export const AppProvider = ({ children }) => {
-  return (
-    <UserProvider>
-      <TicketProvider>{children}</TicketProvider>
-    </UserProvider>
-  );
+  return <UserProvider>{children}</UserProvider>;
 };
 
 AppProvider.propTypes = {

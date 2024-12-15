@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
 
+import { useUser } from '@/hooks/useUser';
+
 // icons
-import { UserCircle, LucideLogIn } from 'lucide-react';
+import { UserCircle, LucideLogOut } from 'lucide-react';
 
 export const Navbar = () => {
+  const { logout } = useUser();
+
   return (
     <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
       <Link
@@ -25,8 +29,12 @@ export const Navbar = () => {
           Create Ticket
         </Link>
 
-        <Link to="/" className="text-xl text-gray-600 hover:text-gray-800">
-          <LucideLogIn className="w-6 h-6" />
+        <Link
+          onClick={logout}
+          to="/"
+          className="text-xl text-gray-600 hover:text-gray-800"
+        >
+          <LucideLogOut className="w-6 h-6" />
         </Link>
 
         <Link to="/user" className="text-xl text-gray-600 hover:text-gray-800">
