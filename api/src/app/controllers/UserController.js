@@ -153,7 +153,7 @@ class UserController {
 
       const { page = 1, limit = 10 } = req.query;
 
-      const users = await Users.findAndCountAll({
+      const { rows: users } = await Users.findAndCountAll({
         attributes: ['id', 'name', 'email', 'admin'],
         include: [
           { model: Departments, as: 'department', attributes: ['id', 'title'] },
@@ -162,11 +162,7 @@ class UserController {
         offset: (page - 1) * limit,
       });
 
-      return res.status(200).json({
-        total: users.count,
-        pages: Math.ceil(users.count / limit),
-        users: users.rows,
-      });
+      return res.status(200).json(users);
     } catch (err) {
       console.error(err);
       return res

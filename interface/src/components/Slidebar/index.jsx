@@ -3,8 +3,8 @@ import { Home, Ticket, Users, Settings } from 'lucide-react';
 
 const menuItems = [
   { to: '/home', icon: Home, label: 'Home' },
-  { to: '/ticket', icon: Ticket, label: 'Tickets' },
-  { to: '/users', icon: Users, label: 'Users' },
+  { to: '/create-ticket', icon: Ticket, label: 'Tickets' },
+  { to: '/user', icon: Users, label: 'Users' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

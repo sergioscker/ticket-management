@@ -26,34 +26,27 @@ import {
 export const User = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [department, setDepartment] = useState('');
-  const [departments, setDepartments] = useState([]);
+  const [departments, setDepartments] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const loadingDepartments = async () => {
-      const { data } = await api.get('/departments');
-
-      const newDepartments = [{ id: 0, name: 'All' }, ...data];
-
-      setDepartments(newDepartments);
-    };
-
-    loadingDepartments();
-  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const { data } = await api.get('/users');
 
+        const uniqueDepartments = Array.from(
+          new Map(
+            data.map((user) => [user.department.id, user.department]),
+          ).values(),
+        );
+
         setName(data.name);
 
         setPassword(data.password);
 
-        setDepartment(data.department);
+        setDepartments(uniqueDepartments);
       } catch {
         toast.error('Failed to load user data');
       }
@@ -68,11 +61,7 @@ export const User = () => {
     department: yup.string(),
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { register, handleSubmit } = useForm({
     resolver: yupResolver(schema),
   });
 
@@ -83,7 +72,7 @@ export const User = () => {
       const response = await api.put('/users', {
         name: data.name,
         password: data.password,
-        department,
+        department: data.department,
       });
       if (response.status === 200) {
         toast.success('User updated sucessfully!');
@@ -131,11 +120,6 @@ export const User = () => {
                 placeholder="New name"
                 {...register('name')}
               />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.name.message}
-                </p>
-              )}
             </div>
 
             {/* input password */}
@@ -147,38 +131,29 @@ export const User = () => {
                 placeholder="New password"
                 {...register('password')}
               />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.password.message}
-                </p>
-              )}
             </div>
 
             {/* select department */}
             <div>
-              <Select
-                value={department}
-                onValueChange={(value) => setDepartment(value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
+              {departments ? (
+                <Select {...register('department')} className="w-full">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Select department</SelectLabel>
-                    {departments.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.title}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              {errors.department && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.department.message}
-                </p>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Select department</SelectLabel>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.title}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p>Loading departments...</p>
               )}
             </div>
 

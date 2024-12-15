@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+
 import { getTickets } from '../../service/api';
+import { useTicket } from '../../hooks/useTicket';
 
 // components
 import { Input } from '@/components/ui/input';
@@ -27,11 +29,13 @@ export const HomePage = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [page, setPage] = useState(1); // Pagination
 
+  const { states, updateStates, searchText, updateSearchText } = useTicket();
+
   // Fetch tickets when the component mounts or page changes
   useEffect(() => {
     fetchTickets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, states, searchText]);
 
   // Fetch tickets from the API
   const fetchTickets = async () => {
@@ -41,8 +45,7 @@ export const HomePage = () => {
       const data = await getTickets(page);
 
       setTickets(data);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
+    } catch {
       toast.error('Failed to load tickets.');
     } finally {
       setLoading(false);
@@ -56,6 +59,8 @@ export const HomePage = () => {
         <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-around">
           <Input
             type="text"
+            value={searchText}
+            onChange={(data) => updateSearchText(data.target.value)}
             placeholder="Search tickets"
             className="w-full max-w-md"
           />
@@ -64,7 +69,11 @@ export const HomePage = () => {
             {Object.keys(statusColors).map((status) => (
               <ul key={status} className="flex items-center space-x-2">
                 <li className="flex flex-wrap items-center justify-center p-2 gap-3">
-                  <Checkbox id={status} />
+                  <Checkbox
+                    id={status}
+                    checked={states.includes(status)}
+                    onChange={() => updateStates(status)}
+                  />
                   <span>{status}</span>
                 </li>
               </ul>
