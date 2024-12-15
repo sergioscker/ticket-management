@@ -54,15 +54,15 @@ module.exports = {
           model: 'States',
           key: 'id',
         },
-        id_department: {
-          type: Sequelize.UUID,
-          defaultValue: Sequelize.UUIDV4,
-          references: {
-            model: 'Departments',
-            key: 'id',
-          },
-          onUpdate: 'CASCADE',
-          onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+      id_department: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        references: {
+          model: 'Departments',
+          key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',

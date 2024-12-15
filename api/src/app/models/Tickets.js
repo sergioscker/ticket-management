@@ -3,9 +3,9 @@ const { Model, DataTypes } = require('sequelize');
 
 class Tickets extends Model {
   static associate(models) {
-    this.belongsTo(models.Users, { foreignKey: 'created_by', as: 'creator' });
-    this.belongsTo(models.Users, { foreignKey: 'updated_by', as: 'updator' });
-    this.belongsTo(models.States, { foreignKey: 'id_state', as: 'states' });
+    this.belongsTo(models.Users, { foreignKey: 'createdBy', as: 'creator' });
+    this.belongsTo(models.Users, { foreignKey: 'updatedBy', as: 'updator' });
+    this.belongsTo(models.States, { foreignKey: 'id_state', as: 'state' });
     this.belongsTo(models.Departments, {
       foreignKey: 'id_department',
       as: 'department',

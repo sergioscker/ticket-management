@@ -32,6 +32,7 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
+        allowNull: true,
       },
       admin: {
         type: Sequelize.BOOLEAN,

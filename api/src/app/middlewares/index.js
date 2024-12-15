@@ -4,30 +4,28 @@ const jwt = require('jsonwebtoken');
 const authConfig = require('../../config/auth.js');
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+  const authToken = req.headers.authorization;
 
-  // Check if the token was provided
-  if (!authHeader) {
+  if (!authToken) {
     return res.status(401).json({ error: 'Token not provided' });
   }
 
-  // Extract the token from the 'Bearer <token>' format
-  const [, token] = authHeader.split(' ');
+  const [, token] = authToken.split(' ');
 
   try {
-    // Verify the token using the JWT secret
-    jwt.verify(token, authConfig.secret, (err, decoded) => {
-      if (err) {
-        throw new Error('Token is invalid');
-      }
-      // Attach the user's ID and name from the decoded token to the request
-      req.userId = decoded.id;
-      req.userName = decoded.name;
+    const decoded = jwt.verify(token, authConfig.secret);
 
-      return next();
+    req.userId = decoded.id;
+
+    console.log('Usuário autenticado:', {
+      id: decoded.id,
+      name: decoded.name,
     });
+
+    return next();
   } catch (err) {
-    return res.status(401).json({ error: 'Token is invalid' });
+    console.error('Erro de autenticação:', err.message);
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 

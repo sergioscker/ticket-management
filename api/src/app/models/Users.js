@@ -11,12 +11,12 @@ class Users extends Model {
     });
     // um usuário pode criar vários tickets
     this.hasMany(models.Tickets, {
-      foreignKey: 'created_by',
+      foreignKey: 'createdBy',
       as: 'createdTickets',
     });
     // um usuário(admin) pode atualizar vários tickets
     this.hasMany(models.Tickets, {
-      foreignKey: 'updated_by',
+      foreignKey: 'updatedBy',
       as: 'updatedTickets',
     });
   }

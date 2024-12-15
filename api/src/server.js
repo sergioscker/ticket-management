@@ -1,3 +1,4 @@
+require('dotenv').config();
 const app = require('./app.js');
 const { sequelize } = require('./database/index.js');
 

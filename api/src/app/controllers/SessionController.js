@@ -1,5 +1,3 @@
-'use strict';
-
 const Yup = require('yup');
 const jwt = require('jsonwebtoken');
 const authConfig = require('../../config/auth.js');

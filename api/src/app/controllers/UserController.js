@@ -1,15 +1,28 @@
 const { v4: uuidv4 } = require('uuid');
 const Yup = require('yup');
+const bcrypt = require('bcrypt');
 
 // model
 const Users = require('../models/Users.js');
+const Departments = require('../models/Departments.js');
 
 class UserController {
   async store(req, res) {
+    // verify user admin
+    const user = await Users.findByPk(req.userId);
+
+    if (!user || !user.admin) {
+      return res
+        .status(403)
+        .json({ error: 'You do not have permission to create users.' });
+    }
+
+    // input validation
     const schema = Yup.object({
       name: Yup.string().required(),
       email: Yup.string().email().required(),
       password: Yup.string().required().min(6),
+      departmentTitle: Yup.string().required(),
       admin: Yup.boolean(),
     });
 
@@ -19,47 +32,66 @@ class UserController {
       return res.status(400).json({ error: err.errors });
     }
 
-    const { name, email, password, department, admin } = req.body;
+    const { name, email, password, departmentTitle, admin } = req.body;
 
-    const userExists = await Users.findOne({
-      where: {
+    // verify title department
+    try {
+      const department = await Departments.findOne({
+        where: {
+          title: departmentTitle,
+        },
+      });
+
+      if (!department) {
+        return res.status(400).json({ error: 'Make sure department selected' });
+      }
+
+      // verify if user exists
+      const userExists = await Users.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (userExists) {
+        return res.status(400).json({ error: 'User already exists' });
+      }
+
+      // create user
+      const user = await Users.create({
+        id: uuidv4(),
+        name,
         email,
-      },
-    });
+        password,
+        id_department: department.id,
+        admin,
+      });
 
-    if (userExists) {
-      return response.status(400).json({ error: 'User already exists' });
+      return res.status(201).json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        id_department: department.id,
+        department: department.title,
+        admin: user.admin,
+      });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(500)
+        .json({ error: 'An error ocurred while creating user.' });
     }
-
-    if (!password) {
-      return res.status(400).json({ error: 'Password is required' });
-    }
-
-    if (!department) {
-      return res.status(400).json({ error: 'Make sure department selected' });
-    }
-
-    const user = await Users.create({
-      id: uuidv4(),
-      name,
-      email,
-      password,
-      department,
-      admin,
-    });
-
-    return res.status(201).json({
-      id: user.id,
-      name,
-      email,
-      department,
-      admin,
-    });
   }
 
   async update(req, res) {
+    const user = await Users.findByPk(req.userId);
+
+    if (!user) {
+      return res.status(400).json({ error: 'Make sure your user exists' });
+    }
+
     const schema = Yup.object({
-      email: Yup.string().email(),
+      name: Yup.string(),
       password: Yup.string().min(6),
       department: Yup.string(),
     });
@@ -70,26 +102,39 @@ class UserController {
       return res.status(400).json({ error: err.errors });
     }
 
-    const { id } = req.params;
+    const { name, password, department } = req.body;
 
-    const findUser = await Users.findByPk(id);
-
-    if (!findUser) {
-      return response
-        .status(400)
-        .json({ error: 'Make sure your product ID is correct.' });
+    // Verificar se o departamento enviado é o mesmo já cadastrado no usuário
+    if (department && department === user.department) {
+      return res.status(400).json({
+        error: 'The selected department is already registered for this user.',
+      });
     }
 
-    const { email, password, department } = req.body;
+    const departmentExist = await Departments.findByPk(department);
+
+    if (!departmentExist) {
+      return res.status(400).json({
+        error: 'The selected department does not exist.',
+      });
+    }
+
+    // Verifique se a senha foi enviada
+    let hashedPassword = user.password; // senha atual do user
+
+    if (password) {
+      // Criptografar a nova senha
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
 
     await Users.update(
       {
-        email,
-        password,
+        name,
+        password: hashedPassword,
         department,
       },
       {
-        where: { id },
+        where: { id: req.userId },
       },
     );
 
@@ -109,12 +154,15 @@ class UserController {
       const { page = 1, limit = 10 } = req.query;
 
       const users = await Users.findAndCountAll({
-        attributes: ['id', 'name', 'email', 'departament', 'admin'],
+        attributes: ['id', 'name', 'email', 'admin'],
+        include: [
+          { model: Departments, as: 'department', attributes: ['id', 'title'] },
+        ],
         limit,
         offset: (page - 1) * limit,
       });
 
-      return response.status(200).json({
+      return res.status(200).json({
         total: users.count,
         pages: Math.ceil(users.count / limit),
         users: users.rows,

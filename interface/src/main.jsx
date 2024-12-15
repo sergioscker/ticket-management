@@ -1,23 +1,22 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { routes } from './routes';
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './routes';
 
-// Components
-import { Header } from './components/Header';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// Style
+import { AppProvider } from './hooks';
+
 import './global.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <Header />
-      <Routes>
-        {routes.map(({ path, element }) => (
-          <Route key={path} path={path} element={element} />
-        ))}
-      </Routes>
-    </BrowserRouter>
+    <AppProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+      <ToastContainer autoClose={2000} theme="colored" position="top-right" />
+    </AppProvider>
   </StrictMode>,
 );
