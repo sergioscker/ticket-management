@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 
 export const User = () => {
-  const { userInfo, updateUserInfo } = useUser();
+  const { userInfo, putUserData } = useUser();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -70,6 +70,7 @@ export const User = () => {
       navigate('/');
     }
 
+    // Carregar os departamentos
     const fetchDepartments = async () => {
       try {
         const { data } = await api.get('/departments', {
@@ -105,7 +106,7 @@ export const User = () => {
         toast.success('User updated successfully!');
 
         // Atualizar as informações do usuário
-        updateUserInfo(response.data);
+        putUserData(response.data);
 
         // Redirecionar para a tela de login
         navigate('/');

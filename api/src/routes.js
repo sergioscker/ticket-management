@@ -38,6 +38,6 @@ routes.put('/users', UserController.update);
 // list, create and update ticket.
 routes.get('/tickets', TicketController.index);
 routes.post('/create-ticket', CreateTicketController.store);
-routes.put('/ticket', TicketController.update);
+routes.put('/ticket/:id', TicketController.update);
 
 module.exports = { routes };

@@ -29,8 +29,13 @@ export const HomePage = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [page, setPage] = useState(1); // Pagination
 
-  const { searchText, filteredTickets, handleSearchChange, handleStateToggle } =
-    useTicketFilters(tickets);
+  const {
+    searchText,
+    filteredTickets,
+    handleSearchChange,
+    handleStateToggle,
+    selectedStates,
+  } = useTicketFilters(tickets);
 
   // Fetch tickets when the component mounts or page changes
   useEffect(() => {
@@ -45,13 +50,16 @@ export const HomePage = () => {
 
       const data = await getTickets(page);
 
-      setTickets((prevTickets) => [...prevTickets, ...data]);
+      setTickets(data);
     } catch {
       toast.error('Failed to load tickets.');
     } finally {
       setLoading(false);
     }
   };
+
+  console.log('selectedStates:', selectedStates);
+  console.log('Checkbox status:', Object.keys(statusColors));
 
   return (
     <div className="flex flex-col min-h-screen p-6">
@@ -65,7 +73,7 @@ export const HomePage = () => {
             placeholder="Search tickets"
             className="w-full max-w-md"
           />
-
+          {/* states checkbox */}
           <div className="flex md:flex-row items-center space-y-2 md:space-x-4 md:space-y-0">
             {Object.keys(statusColors).map((status) => (
               <div
@@ -74,8 +82,10 @@ export const HomePage = () => {
               >
                 <Checkbox
                   id={status}
-                  onChange={() => handleStateToggle(status)}
+                  checked={selectedStates.includes(status)}
+                  onCheckedChange={() => handleStateToggle(status)}
                 />
+
                 <label
                   htmlFor={status}
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -92,10 +102,7 @@ export const HomePage = () => {
       <div className="flex overflow-y-auto mx-auto p-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {filteredTickets.map((ticket) => (
-            <Card
-              key={`${ticket.id}-${ticket.createdAt}`}
-              className="flex flex-col h-full"
-            >
+            <Card key={ticket.id} className="flex flex-col h-full">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -114,6 +121,7 @@ export const HomePage = () => {
                 </div>
               </CardHeader>
 
+              {/* tickets information */}
               <CardContent className="flex-1">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -133,6 +141,11 @@ export const HomePage = () => {
                     <span>
                       {new Date(ticket.updatedAt).toLocaleDateString()}
                     </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Description:</span>
+                    <span>{ticket.description}</span>
                   </div>
                 </div>
               </CardContent>

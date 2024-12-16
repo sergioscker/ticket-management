@@ -2,8 +2,7 @@ import axios from 'axios';
 
 export const api = axios.create({
   baseURL: 'http://localhost:3000',
-  withCredentials: true,    
-
+  withCredentials: true,
 });
 
 // user authentication
@@ -19,7 +18,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const getTickets = async (page = 1, limit = 10) => {
+export const getTickets = async (page = 1, limit = 12) => {
   const response = await api.get(`/tickets?page=${page}&limit=${limit}`);
   return response.data;
 };

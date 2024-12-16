@@ -100,6 +100,16 @@ export const TicketDetailsPage = () => {
                     <span>{new Date(ticket.updatedAt).toLocaleString()}</span>
                   </div>
 
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Creator:</span>
+                    <span>{ticket.creator.name}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Updator:</span>
+                    <span>{ticket.updator.name}</span>
+                  </div>
+
                   <div>
                     <h3 className="font-semibold mb-2">Description:</h3>
                     <p className="text-sm text-gray-700">
