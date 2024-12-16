@@ -24,10 +24,10 @@ This README aims to provide a detailed overview of the ticket management platfor
 
 This project is a ticket management platform that allows users to:
 
-- **Create Tickets**: Create new tickets with detailed information such as title, description, observations, creator, state, and department.
+- **Create Tickets**: Create new tickets with detailed information such as title, description, observations, creator, updator, state, and department.
 - **Edit Tickets**: Edit the details of an existing ticket. **Only administrators** have the permissions to edit tickets.
 - **View Tickets**: View a list of tickets and the details of a specific ticket.
-- **Manage User Data**: Manage user profile data, including changes to name, email, password, etc.
+- **Manage User Data**: Manage user profile data, including changes to name, password and department.
 
 The backend of the application is built with **Node.js** using **Sequelize** for database management with PostgreSQL. The frontend is built with **React** using **Vite** as the build tool.
 
@@ -51,9 +51,9 @@ The backend of the application is built with **Node.js** using **Sequelize** for
 
 ### Frontend
 - **User Interface** for managing tickets.
-- **Forms** for creating, editing, and viewing tickets.
+- **Forms** for creating and viewing tickets.
 - **Pagination and filters** to make ticket navigation easier.
-- **Notifications** for feedback to the user after creating or editing tickets.
+- **Notifications** for feedback to the user after creating tickets.
 - **Integration with Backend API** for data persistence and ticket manipulation.
 
 ---
@@ -110,7 +110,7 @@ The backend of the application is built with **Node.js** using **Sequelize** for
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/sergioscker/ticket-managment.git
-   cd ticket-managment
+   cd ticket-management
    ```
 
 2. **Install Dependencies**:
@@ -123,7 +123,7 @@ The backend of the application is built with **Node.js** using **Sequelize** for
    yarn dev
    ```
 
-4. **Access the application in the browser**: [http://localhost:3000](http://localhost:5173)
+4. **Access the application in the browser**: [http://localhost:5173](http://localhost:5173)
 
 ---
 
@@ -181,14 +181,14 @@ The backend of the application is built with **Node.js** using **Sequelize** for
 - **`GET /tickets/:id`**: View details of a specific ticket.
 
 ### Users
-- **`POST /users/signup`**: Register a new user.
-- **`POST /users/login`**: Log in.
-- **`PUT /users/:id`**: Edit user data.
+- **`POST /users`**: Register a new user.
+- **`POST /session`**: Log in.
+- **`PUT /users`**: Edit user data.
 - **`GET /users/:id`**: View user profile.
 
 ### Authentication
-- **`POST /auth/login`**: Authenticate a user and return a JWT token.
-- **`POST /auth/refresh`**: Refresh an expired JWT token.
+- **`POST /session`**: Authenticate a user and return a JWT token.
+- **`POST /session`**: Refresh an expired JWT token.
 
 ---
 
