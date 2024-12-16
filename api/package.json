@@ -4,7 +4,6 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "build": "sucrase-node src/server.js -d dist",
     "start": "node src/server.js"
   },
   "keywords": [],
