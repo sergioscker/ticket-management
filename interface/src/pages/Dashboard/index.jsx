@@ -54,7 +54,7 @@ export const TicketDetailsPage = () => {
 
       {/* Content Area */}
       <div className="w-full">
-        <h1 className="text-3xl font-bold mb-6 text-center md:text-left">
+        <h1 className="text-3xl p-5 font-bold mb-6 text-center md:text-left">
           Ticket Details
         </h1>
 
@@ -107,7 +107,7 @@ export const TicketDetailsPage = () => {
 
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Updator:</span>
-                    <span>{ticket.updator.name}</span>
+                    <span>{ticket.updator?.name}</span>
                   </div>
 
                   <div>
