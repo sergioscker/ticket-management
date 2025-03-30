@@ -14,7 +14,6 @@ This README aims to provide a detailed overview of the ticket management platfor
 - [API Endpoints](#api-endpoints)
 - [Development Scripts](#development-scripts)
 - [Database Configuration](#database-configuration)
-- [Tests](#tests)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -210,18 +209,6 @@ The backend of the application is built with **Node.js** using **Sequelize** for
 1. Ensure PostgreSQL is installed and running.
 2. Configure environment variables as per the `.env.example` files in both `backend` and `frontend`.
 3. Run database migrations using the command `yarn sequelize-cli db:migrate`.
-
----
-
-## Tests
-
-### Backend
-- Use `jest` for unit tests and `supertest` for integration tests.
-- Run tests with `yarn test` or separately with `yarn test:unit` and `yarn test:integration`.
-
-### Frontend
-- Use `eslint` for linting.
-- Run lint tests with `yarn lint`.
 
 ---
 
