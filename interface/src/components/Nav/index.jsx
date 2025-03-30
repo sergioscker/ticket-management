@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 
-import { useUser } from '@/hooks/useUser';
+import { UserContext } from '@/hooks/UserProvider';
+import { useContext } from 'react';
 
 // icons
 import { UserCircle, LucideLogOut } from 'lucide-react';
 
 export const Navbar = () => {
-  const { logout } = useUser();
+  const { logout } = useContext(UserContext);
 
   return (
     <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">

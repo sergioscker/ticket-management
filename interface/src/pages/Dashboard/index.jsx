@@ -66,6 +66,7 @@ export const TicketDetailsPage = () => {
                 <CardTitle className="text-lg font-semibold">
                   {ticket.title}
                 </CardTitle>
+
                 <CardDescription className="text-sm text-gray-500">
                   Ticket ID: {ticket.id}
                 </CardDescription>
@@ -75,6 +76,7 @@ export const TicketDetailsPage = () => {
                 <div className="grid gap-4">
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">State:</span>
+
                     <Badge
                       className={`${
                         statusColors[ticket.state.title] ||
@@ -87,22 +89,26 @@ export const TicketDetailsPage = () => {
 
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Department:</span>
+
                     <span>{ticket.department.title}</span>
                   </div>
 
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Created:</span>
+
                     <span>{new Date(ticket.createdAt).toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Last Updated:</span>
+
                     <span>{new Date(ticket.updatedAt).toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Creator:</span>
-                    <span>{ticket.creator.name}</span>
+
+                    <span>{ticket.creator}</span>
                   </div>
 
                   <div className="flex justify-between items-center">

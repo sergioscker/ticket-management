@@ -58,9 +58,6 @@ export const HomePage = () => {
     }
   };
 
-  console.log('selectedStates:', selectedStates);
-  console.log('Checkbox status:', Object.keys(statusColors));
-
   return (
     <div className="flex flex-col min-h-screen p-6">
       {/* Search Section */}

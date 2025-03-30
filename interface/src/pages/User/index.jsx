@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 
+// validations
+import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+//api service
 import { api } from '@/service/api';
+
+// notifications
 import { toast } from 'react-toastify';
-import { useUser } from '@/hooks/useUser';
+
+// context user
+import { UserContext } from '../../hooks/UserProvider';
+import { useContext } from 'react';
 
 // components
 import { Button } from '@/components/ui/button';
@@ -24,7 +31,7 @@ import {
 } from '@/components/ui/select';
 
 export const User = () => {
-  const { userInfo, putUserData } = useUser();
+  const { userInfo } = useContext(UserContext);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +43,8 @@ export const User = () => {
     currentPassword: yup
       .string()
       .min(6, 'Current password must be at least 6 characters')
-      .optional(),
+      .required(),
+
     newPassword: yup
       .string()
       .min(6, 'New password must be at least 6 characters')
@@ -44,38 +52,42 @@ export const User = () => {
         [yup.ref('currentPassword'), null],
         'New password cannot be the same as current password',
       )
-      .optional(),
-    department: yup.string().required('Department is required'),
+      .required(),
+
+    department: yup.string().optional(),
   });
 
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      name: userInfo?.name || '',
-      currentPassword: '',
-      newPassword: '',
-      department: userInfo?.id_department || '',
-    },
     resolver: yupResolver(schema),
+    shouldUnregister: true,
   });
+
+  useEffect(() => {
+    if (userInfo) {
+      reset({
+        name: userInfo.name,
+        department: userInfo.id_department,
+      });
+    }
+  }, [userInfo, reset]);
 
   // Fetch dos departamentos e validação do token
   useEffect(() => {
-    if (!userInfo?.token) {
-      toast.error('User not authenticated.');
+    if (userInfo) {
       navigate('/');
     }
 
     // Carregar os departamentos
     const fetchDepartments = async () => {
       try {
-        const { data } = await api.get('/departments', {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await api.get('/departments');
+
         setDepartments(data);
       } catch {
         toast.error('Failed to load departments. Please try again later.');
@@ -86,27 +98,22 @@ export const User = () => {
   }, [userInfo, navigate]);
 
   // Atualizar informações do usuário
-  const onSubmitUpdateLogin = async (data) => {
+  const SubmitUpdateLogin = async (data) => {
     setLoading(true);
 
     // Limpar valores vazios ou não alterados
-    const updatedData = {};
-    if (data.name) updatedData.name = data.name;
-    if (data.currentPassword)
-      updatedData.currentPassword = data.currentPassword;
-    if (data.newPassword) updatedData.newPassword = data.newPassword;
-    if (data.department) updatedData.department = data.department;
+    const updateData = {};
+
+    if (data.name) updateData.name = data.name;
+    if (data.currentPassword) updateData.currentPassword = data.currentPassword;
+    if (data.newPassword) updateData.newPassword = data.newPassword;
+    if (data.department) updateData.department = data.department;
 
     try {
-      const response = await api.put('/users', updatedData, {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
-      });
+      const response = await api.put('/users', updateData);
 
       if (response.status === 200) {
         toast.success('User updated successfully!');
-
-        // Atualizar as informações do usuário
-        putUserData(response.data);
 
         // Redirecionar para a tela de login
         navigate('/');
@@ -134,12 +141,13 @@ export const User = () => {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Change Informations
+            Change User Informations
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           <form
-            onSubmit={handleSubmit(onSubmitUpdateLogin)}
+            onSubmit={handleSubmit(SubmitUpdateLogin)}
             className="space-y-4"
           >
             {/* Input Name */}
@@ -184,12 +192,13 @@ export const User = () => {
             <div>
               <Select
                 onValueChange={(value) => setValue('department', value)}
-                defaultValue={userInfo?.department || ''}
+                defaultValue={userInfo?.id_department || ''}
                 className="w-full"
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Select department</SelectLabel>
@@ -209,7 +218,7 @@ export const User = () => {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Sending...' : 'Send Information'}
+              {loading ? 'Sending...' : 'Sent Informations'}
             </Button>
           </form>
         </CardContent>

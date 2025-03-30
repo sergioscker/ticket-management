@@ -4,8 +4,17 @@ const { sequelize } = require('./database/index.js');
 
 const port = process.env.PORT || 3000;
 
-sequelize.authenticate().then(() => {
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`🛜  Server running at port ${port}...`);
-  });
-});
+const startServer = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('📦 Database connected successfully.');
+
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`🛜  Server running at port ${port}...`);
+    });
+  } catch (error) {
+    console.error('❌  Database connection failed:', error);
+  }
+};
+
+startServer();

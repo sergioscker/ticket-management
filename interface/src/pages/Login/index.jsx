@@ -1,11 +1,20 @@
+// validations
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-
-import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+
+// navigation
+import { useNavigate } from 'react-router-dom';
+
+// notifications
 import { toast } from 'react-toastify';
+
+// api service
 import { api } from '@/service/api';
-import { useUser } from '@/hooks/useUser';
+
+// context user
+import { UserContext } from '../../hooks/UserProvider';
+import { useContext, useEffect } from 'react';
 
 // components
 import { Button } from '@/components/ui/button';
@@ -15,7 +24,7 @@ import { Card, CardTitle, CardContent, CardHeader } from '@/components/ui/card';
 export const Login = () => {
   const navigate = useNavigate();
 
-  const { putUserData } = useUser();
+  const { userInfo } = useContext(UserContext);
 
   const schema = yup.object({
     email: yup.string().email('Email is required field').required(),
@@ -32,8 +41,9 @@ export const Login = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
   const onSubmitLogin = async (data) => {
-    const { data: userData } = await toast.promise(
+    await toast.promise(
       api.post('/session', {
         email: data.email,
         password: data.password,
@@ -51,25 +61,31 @@ export const Login = () => {
         error: 'Make sure your email or password are correct, 😓',
       },
     );
-
-    putUserData(userData);
   };
+
+  useEffect(() => {
+    if (userInfo) {
+      navigate('/home');
+    }
+  }, [userInfo, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Login
+            Sign in
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit(onSubmitLogin)} className="space-y-4">
             <div>
+              {/* password email */}
               <Input
                 type="email"
                 {...register('email')}
-                placeholder="Email"
+                placeholder="email"
                 className={errors.email ? 'border-red-500' : ''}
               />
               {errors.email && (
@@ -78,11 +94,13 @@ export const Login = () => {
                 </p>
               )}
             </div>
+
+            {/* password input */}
             <div>
               <Input
                 type="password"
                 {...register('password')}
-                placeholder="Password"
+                placeholder="password"
                 className={errors.password ? 'border-red-500' : ''}
               />
               {errors.password && (

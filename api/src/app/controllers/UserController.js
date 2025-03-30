@@ -17,7 +17,7 @@ class UserController {
         .json({ error: 'You do not have permission to create users.' });
     }
 
-    // input validation
+    // input validations
     const schema = Yup.object({
       name: Yup.string().required(),
       email: Yup.string().email().required(),

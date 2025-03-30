@@ -17,25 +17,25 @@ routes.get('/', (_, res) => {
   return res.json({ message: 'We are ready!🚀' });
 });
 
-// login and update user.
+// login user.
 routes.post('/session', SessionController.store);
 
 // intercepts all routes below
 routes.use(authMiddleware);
 
-// create, update, update and list departments and states
+// create, update and list departments and states
 routes.get('/departments', DepartmentsController.index);
 routes.post('/departments', DepartmentsController.store);
 
 routes.get('/states', StatesController.index);
 routes.post('/states', StatesController.store);
 
-// create and list user.
+// create, list, update users.
 routes.get('/users', UserController.index);
 routes.post('/users', UserController.store);
-routes.put('/users', UserController.update);
+routes.put('/users/:id', UserController.update);
 
-// list, create and update ticket.
+// create, list and update ticket.
 routes.get('/tickets', TicketController.index);
 routes.post('/create-ticket', CreateTicketController.store);
 routes.put('/ticket/:id', TicketController.update);

@@ -5,18 +5,16 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// user authentication
-api.interceptors.request.use((config) => {
-  const userData = localStorage.getItem('ticketmanagement:userData');
+// login request
+export const login = async (email, password) => {
+  const response = await api.post('/session', { email, password });
+  return response.data;
+};
 
-  const token = userData && JSON.parse(userData).token;
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
+// logout request
+export const logout = async () => {
+  await api.post('/logout');
+};
 
 export const getTickets = async (page = 1, limit = 12) => {
   const response = await api.get(`/tickets?page=${page}&limit=${limit}`);
