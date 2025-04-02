@@ -17,6 +17,10 @@ function authMiddleware(req, res, next) {
 
     return next();
   } catch (err) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Token error:', err.message);
+    }
+
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }

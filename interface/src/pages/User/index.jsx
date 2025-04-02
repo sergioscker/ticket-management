@@ -1,22 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// validations
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-//api service
-import { api } from '@/service/api';
+import { api, getDepartments } from '@/service/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-// notifications
+import { useAuth } from '@/context';
 import { toast } from 'react-toastify';
 
-// context user
-import { UserContext } from '../../hooks/UserProvider';
-import { useContext } from 'react';
-
-// components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardTitle, CardContent, CardHeader } from '@/components/ui/card';
@@ -29,22 +23,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import PropTypes from 'prop-types';
 
 export const User = () => {
-  const { userInfo } = useContext(UserContext);
-  const [departments, setDepartments] = useState([]);
+  const { user, isLoading: userLoading } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
+  const {
+    data: departments = [],
+    isLoading: departmentsLoading,
+    error: departmentsError,
+  } = useQuery({
+    queryKey: ['departments'],
 
-  // Schema de validação
+    queryFn: getDepartments,
+    staleTime: 1000 * 60 * 10,
+  });
+
   const schema = yup.object({
     name: yup.string().required('Name is required'),
     currentPassword: yup
       .string()
       .min(6, 'Current password must be at least 6 characters')
       .required(),
-
     newPassword: yup
       .string()
       .min(6, 'New password must be at least 6 characters')
@@ -53,7 +56,6 @@ export const User = () => {
         'New password cannot be the same as current password',
       )
       .required(),
-
     department: yup.string().optional(),
   });
 
@@ -69,56 +71,48 @@ export const User = () => {
   });
 
   useEffect(() => {
-    if (userInfo) {
-      reset({
-        name: userInfo.name,
-        department: userInfo.id_department,
-      });
-    }
-  }, [userInfo, reset]);
-
-  // Fetch dos departamentos e validação do token
-  useEffect(() => {
-    if (userInfo) {
+    if (!user && !userLoading) {
       navigate('/');
     }
 
-    // Carregar os departamentos
-    const fetchDepartments = async () => {
-      try {
-        const { data } = await api.get('/departments');
+    if (user) {
+      reset({
+        name: user.name,
+        department: user.id_department,
+      });
+    }
+  }, [user, userLoading, reset, navigate]);
 
-        setDepartments(data);
-      } catch {
-        toast.error('Failed to load departments. Please try again later.');
-      }
-    };
-
-    fetchDepartments();
-  }, [userInfo, navigate]);
-
-  // Atualizar informações do usuário
   const SubmitUpdateLogin = async (data) => {
     setLoading(true);
 
-    // Limpar valores vazios ou não alterados
-    const updateData = {};
-
-    if (data.name) updateData.name = data.name;
-    if (data.currentPassword) updateData.currentPassword = data.currentPassword;
-    if (data.newPassword) updateData.newPassword = data.newPassword;
-    if (data.department) updateData.department = data.department;
+    const updateData = {
+      name: data.name,
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+      department: data.department || null,
+    };
 
     try {
       const response = await api.put('/users', updateData);
 
       if (response.status === 200) {
-        toast.success('User updated successfully!');
+        if (data.newPassword) {
+          toast.success('Password updated. Please log in again.');
 
-        // Redirecionar para a tela de login
-        navigate('/');
+          await api.post('/logout');
+
+          queryClient.removeQueries(['user']);
+
+          navigate('/');
+        } else {
+          toast.success('User updated successfully!');
+
+          await queryClient.invalidateQueries(['user']);
+
+          navigate('/home');
+        }
       } else {
-        // Caso algum erro inesperado ocorra, como status HTTP diferente de 200
         throw new Error('Unexpected error');
       }
     } catch (error) {
@@ -136,12 +130,24 @@ export const User = () => {
     }
   };
 
+  if (departmentsLoading || userLoading) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
+
+  if (departmentsError) {
+    return (
+      <div className="text-center text-red-500">
+        Failed to load departments.
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-3">
+      <Card className="w-full max-w-md border">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Change User Informations
+            Change User Information
           </CardTitle>
         </CardHeader>
 
@@ -150,50 +156,34 @@ export const User = () => {
             onSubmit={handleSubmit(SubmitUpdateLogin)}
             className="space-y-4"
           >
-            {/* Input Name */}
-            <div>
-              <Input type="text" placeholder="New name" {...register('name')} />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
+            {/* Nome */}
+            <InputGroup
+              placeholder="New name"
+              error={errors.name}
+              {...register('name')}
+            />
 
-            {/* Input Current Password */}
-            <div>
-              <Input
-                type="password"
-                placeholder="Current password"
-                {...register('currentPassword')}
-              />
-              {errors.currentPassword && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.currentPassword.message}
-                </p>
-              )}
-            </div>
+            {/* Senha atual */}
+            <InputGroup
+              type="password"
+              placeholder="Current password"
+              error={errors.currentPassword}
+              {...register('currentPassword')}
+            />
 
-            {/* Input New Password */}
-            <div>
-              <Input
-                type="password"
-                placeholder="New password"
-                {...register('newPassword')}
-              />
-              {errors.newPassword && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.newPassword.message}
-                </p>
-              )}
-            </div>
+            {/* Nova senha */}
+            <InputGroup
+              type="password"
+              placeholder="New password"
+              error={errors.newPassword}
+              {...register('newPassword')}
+            />
 
-            {/* Select Department */}
+            {/* Departamento */}
             <div>
               <Select
                 onValueChange={(value) => setValue('department', value)}
-                defaultValue={userInfo?.id_department || ''}
-                className="w-full"
+                defaultValue={user?.id_department || ''}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
@@ -201,7 +191,8 @@ export const User = () => {
 
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Select department</SelectLabel>
+                    <SelectLabel>Departments</SelectLabel>
+
                     {departments.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id}>
                         {dept.title}
@@ -218,11 +209,24 @@ export const User = () => {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Sending...' : 'Sent Informations'}
+              {loading ? 'Sending...' : 'Send Information'}
             </Button>
           </form>
         </CardContent>
       </Card>
     </div>
   );
+};
+
+const InputGroup = ({ error, ...props }) => (
+  <div>
+    <Input {...props} />
+    {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
+  </div>
+);
+
+InputGroup.propTypes = {
+  error: PropTypes.shape({
+    message: PropTypes.string,
+  }),
 };

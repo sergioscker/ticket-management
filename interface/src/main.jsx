@@ -3,16 +3,30 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AppRoutes } from './routes';
 
-import { AppProvider } from './hooks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './global.css';
 
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+import { AuthProvider } from './context';
+
+const queryClient = new QueryClient();
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AppProvider>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppRoutes />
+        <AuthProvider>
+          <AppRoutes />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            draggable
+            theme="colored"
+          />
+        </AuthProvider>
       </BrowserRouter>
-    </AppProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );

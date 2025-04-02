@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
+
+// get tickets api
 import { getTickets } from '../../service/api';
+
+// notifications
 import { toast } from 'react-toastify';
 
 // components
@@ -16,7 +20,7 @@ import {
 
 const statusColors = {
   Pending: 'bg-yellow-200 text-yellow-800',
-  'In Progress': 'bg-blue-200 text-blue-800',
+  Progress: 'bg-blue-200 text-blue-800',
   Rejected: 'bg-red-200 text-red-800',
   Completed: 'bg-green-200 text-green-800',
 };

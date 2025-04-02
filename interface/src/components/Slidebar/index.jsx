@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Home, Ticket, Users, Settings } from 'lucide-react';
+
+import { Home, Ticket, Users } from 'lucide-react';
 
 const menuItems = [
   { to: '/home', icon: Home, label: 'Home' },
   { to: '/create-ticket', icon: Ticket, label: 'Tickets' },
   { to: '/user', icon: Users, label: 'Users' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  // { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 export const Slidebar = () => {

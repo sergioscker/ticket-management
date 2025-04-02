@@ -26,14 +26,15 @@ routes.use(authMiddleware);
 // create, update and list departments and states
 routes.get('/departments', DepartmentsController.index);
 routes.post('/departments', DepartmentsController.store);
-
 routes.get('/states', StatesController.index);
 routes.post('/states', StatesController.store);
 
 // create, list, update users.
 routes.get('/users', UserController.index);
+routes.get('/profile', UserController.profile);
 routes.post('/users', UserController.store);
-routes.put('/users/:id', UserController.update);
+routes.put('/users', UserController.update);
+routes.post('/logout', SessionController.logout);
 
 // create, list and update ticket.
 routes.get('/tickets', TicketController.index);

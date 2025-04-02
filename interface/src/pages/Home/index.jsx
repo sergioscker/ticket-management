@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 import { getTickets } from '../../service/api';
+
 import { useTicketFilters } from '@/hooks/useTicketFilters';
 
 // components
@@ -20,7 +21,7 @@ import {
 const statusColors = {
   Pending: 'bg-yellow-200 text-yellow-800',
   Rejected: 'bg-red-200 text-red-800',
-  'In Progress': 'bg-blue-200 text-blue-800',
+  Progress: 'bg-blue-200 text-blue-800',
   Completed: 'bg-green-200 text-green-800',
 };
 
@@ -70,6 +71,7 @@ export const HomePage = () => {
             placeholder="Search tickets"
             className="w-full max-w-md"
           />
+
           {/* states checkbox */}
           <div className="flex md:flex-row items-center space-y-2 md:space-x-4 md:space-y-0">
             {Object.keys(statusColors).map((status) => (
@@ -104,6 +106,7 @@ export const HomePage = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{ticket.title}</CardTitle>
+
                     <CardDescription>Ticket ID: {ticket.id}</CardDescription>
                   </div>
 
@@ -121,27 +124,35 @@ export const HomePage = () => {
               {/* tickets information */}
               <CardContent className="flex-1">
                 <div className="space-y-2">
+                  {/* departments */}
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Department:</span>
+
                     <span>{ticket.department.title}</span>
                   </div>
 
+                  {/* created ticket */}
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Created:</span>
+
                     <span>
                       {new Date(ticket.createdAt).toLocaleDateString()}
                     </span>
                   </div>
 
+                  {/* updated ticket */}
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Updated:</span>
+
                     <span>
                       {new Date(ticket.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
 
+                  {/* description */}
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Description:</span>
+
                     <span>{ticket.description}</span>
                   </div>
                 </div>

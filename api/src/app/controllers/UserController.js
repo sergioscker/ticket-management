@@ -79,7 +79,7 @@ class UserController {
       console.log(err);
       return res
         .status(500)
-        .json({ error: 'An error ocurred while creating user.' });
+        .json({ error: 'An error occurred while creating the user.' });
     }
   }
 
@@ -118,7 +118,8 @@ class UserController {
 
     // Verificar se o departamento existe, se fornecido
     if (department) {
-      const departmentExist = await Departments.findByPk(department);
+      const departmentExist = await Departments.findByPk(department.id);
+
       if (!departmentExist) {
         return res.status(400).json({ error: 'Department not found.' });
       }
@@ -126,6 +127,7 @@ class UserController {
 
     // Atualizar apenas os campos modificados
     const updatedData = {};
+
     if (name) updatedData.name = name;
     if (department) updatedData.id_department = department;
 
@@ -184,6 +186,21 @@ class UserController {
         .status(500)
         .json({ error: 'An error occurred while fetching users.' });
     }
+  }
+
+  async profile(req, res) {
+    const user = await Users.findByPk(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      admin: user.admin,
+    });
   }
 }
 

@@ -3,9 +3,6 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 
-// navigation
-import { useNavigate } from 'react-router-dom';
-
 // notifications
 import { toast } from 'react-toastify';
 
@@ -13,26 +10,24 @@ import { toast } from 'react-toastify';
 import { api } from '@/service/api';
 
 // context user
-import { UserContext } from '../../hooks/UserProvider';
-import { useContext, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+
+// navigation
+import { useNavigate } from 'react-router-dom';
 
 // components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardTitle, CardContent, CardHeader } from '@/components/ui/card';
 
+const schema = yup.object({
+  email: yup.string().email('Email is required field').required(),
+  password: yup.string().min(6, 'Password must have six caracteres').required(),
+});
+
 export const Login = () => {
   const navigate = useNavigate();
-
-  const { userInfo } = useContext(UserContext);
-
-  const schema = yup.object({
-    email: yup.string().email('Email is required field').required(),
-    password: yup
-      .string()
-      .min(6, 'Password must have six caracteres')
-      .required(),
-  });
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -50,31 +45,23 @@ export const Login = () => {
       }),
       {
         pending: 'Checking your data',
-        success: {
-          render() {
-            setTimeout(() => {
-              navigate('/home');
-            }, 2000);
-            return 'Welcome👌';
-          },
-        },
-        error: 'Make sure your email or password are correct, 😓',
+        success: 'Welcome 👌',
+        error: 'Make sure your email or password are correct 😓',
       },
     );
+
+    // Refetch ou pré-carrega os dados do usuário autenticado
+    await queryClient.invalidateQueries(['user']);
+
+    navigate('/home');
   };
 
-  useEffect(() => {
-    if (userInfo) {
-      navigate('/home');
-    }
-  }, [userInfo, navigate]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-3">
+      <Card className="w-full max-w-md border border-gray-400">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Sign in
+            Login
           </CardTitle>
         </CardHeader>
 
@@ -111,7 +98,7 @@ export const Login = () => {
             </div>
 
             <Button type="submit" className="w-full">
-              Login
+              Sign in
             </Button>
           </form>
         </CardContent>
